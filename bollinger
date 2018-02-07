@@ -2,10 +2,7 @@
 
 import sys
 
-from statistics import mean, pstdev, median_low, median_high
-
-
-def readfile(name, period):
+def readfile(name, index, period):
 	file = open(name, 'r')
 	lines = []
 	if file is None:
@@ -13,30 +10,71 @@ def readfile(name, period):
 	for line in file:
 		if line is not "":
 			lines.append(float(line.replace('\n', '')))
-	return lines[-int(period):]
+	print(lines[-int(period):index])
+	return lines[index:-int(period)]
 
-def get_moy(lines):
+def display_help():
+	print("Bollinger Bands\n")
+	print("USAGE")
+	print("\t./bollinger [-h] period standard_dev indexes_file index_number\n")
+
+	print("\tperiod\t\tnumber of indexes for the moving average")
+	print("\tstandard_dev\tstandard deviation coefficient to apply")
+	print("\tindexes_file\tfile containing daily indexes")
+	print("\tindex_number\tindex number to compute moving average and Bollinger bands\n")
+
+	print("OPTIONS")
+	print("\t-h\t\tprint the usage and quit")
+
+def moy(lines):
 	moy = 0
-	for line in lines:
-		moy += line
-	return mean(lines)
+	for nb in lines:
+		moy += nb
+	moy /= len(lines)
+	return moy
+
+def standard(lines):
+    return variance(lines)**0.5
+
+def variance(lines):
+    moyen = moy(lines)
+    return moy([(x-moyen)**2 for x in lines])
+
+def print_args(index, period, coef):
+	print("INPUT")
+	print("Index: {}".format(index))
+	print("Period: {}".format(period))
+	print("SD_coef: {0:0.2f}".format(coef))
+
+def print_output(lines, standard_dev, index):
+	B_high = moy(lines) + (standard(lines) * index)
+	B_low = moy(lines) - (standard(lines) * index)
+
+	print()
+	print("OUTPUT")
+	print("MA: {0:0.2f}".format(moy(lines)))
+	print("SD: {0:0.2f}".format(standard(lines)))
+	print("B+: {0:0.2f}".format(B_high))
+	print("B-: {0:0.2f}".format(B_low))
+	
 
 def main():
 	try:
-		file = sys.argv[2]
-		period = sys.argv[3]
-		deviation = float(sys.argv[4])
+		period = int(sys.argv[1])
+		standard_dev = float(sys.argv[2])
+		file = sys.argv[3]
+		index_number = int(sys.argv[4])
 	except:
-		print("Error arguments")
-		return 1
+		display_help()
+		sys.exit(1)
+	if period == "-h":
+		display_help()
+		sys.exit(0)
 
-	lines = readfile(file, period)
-	B_high = get_moy(lines) + (pstdev(lines) * deviation)
-	B_low = get_moy(lines) - (pstdev(lines) * deviation)
-	print("MA: {0:0.2f}".format(get_moy(lines)))
-	print("SD: {0:0.2f}".format(pstdev(lines)))
-	print("B+: {0:0.2f}".format(B_high))
-	print("B-: {0:0.2f}".format(B_low))
+	readfile(file, index_number, period)
+	print_args(index_number, period, standard_dev)
+	print_output(readfile(file, index_number, period), standard_dev, index_number)
+	
 
 if __name__ == '__main__':
 	main()
