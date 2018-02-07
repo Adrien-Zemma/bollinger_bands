@@ -1,10 +1,12 @@
 #! /usr/bin/env python
 
 import sys
-import os.path
+import argparse
+import os
 
 from calc import moy, standard, variance, readfile
 
+from graph import print_graph
 
 def display_help():
 	print("Bollinger Bands\n")
@@ -18,6 +20,7 @@ def display_help():
 
 	print("OPTIONS")
 	print("\t-h\t\tprint the usage and quit")
+	print("\t-g\t\tprint a graphical of bollinger bands")
 
 def print_args(index, period, coef):
 	print("INPUT")
@@ -42,20 +45,22 @@ def print_output(lines, index, period, standard_dev):
 	
 
 def main():
-	try:
-		period = int(sys.argv[1])
-		standard_dev = float(sys.argv[2])
-		file = sys.argv[3]
-		index_number = int(sys.argv[4])
-	except:
-		display_help()
-		sys.exit(1)
-	if period == "-h" or not os.path.isfile(file):
-		display_help()
-		sys.exit(0)
+	parser = argparse.ArgumentParser()
+	parser.add_argument("period", help="number of indexes for the moving average", type=int)
+	parser.add_argument("standard_dev", help="standard deviation coefficient to apply", type=float)
+	parser.add_argument("indexes_file", help="file containing daily indexes", type=str)
+	parser.add_argument("index_number", help="index number to compute moving average and Bollinger bands", type=int)
+	parser.add_argument("-g", "--graph", help="print a graph of bollinger bands", action="store_true")
+	args = parser.parse_args()
 
-	print_args(index_number, period, standard_dev)
-	print_output(readfile(file, index_number, period), index_number, period, standard_dev)
+	if not os.path.isfile(args.indexes_file):
+		print("Can't find file '{}'".format(args.indexes_file), file=sys.stderr)
+		sys.exit(84)
+	elif args.graph:
+		print_graph(readfile(args.indexes_file, args.index_number, args.period))
+	else:
+		print_args(args.index_number, args.period, args.standard_dev)
+		print_output(readfile(args.indexes_file, args.index_number, args.period), args.index_number, args.period, args.standard_dev)
 	
 
 if __name__ == '__main__':
