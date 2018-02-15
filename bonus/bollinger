@@ -3,8 +3,11 @@
 import sys
 import argparse
 import os
+from urllib.request import Request, urlopen
 
-from calc import moy, standard, variance, readfile
+import json
+
+from calc import moy, standard, variance, readfile, deviation
 
 from graph import print_graph
 
@@ -29,9 +32,7 @@ def print_args(index, period, coef):
 	print("SD_coef: {0:0.2f}".format(coef))
 
 def print_output(lines, index, period, standard_dev):
-	B_high = moy(lines) + (standard_dev * standard(lines))
-	B_low = moy(lines) - (standard_dev * standard(lines))
-
+	B_high, B_low = deviation(lines, standard_dev)
 	print()
 	print("OUTPUT")
 	try:
@@ -48,19 +49,35 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("period", help="number of indexes for the moving average", type=int)
 	parser.add_argument("standard_dev", help="standard deviation coefficient to apply", type=float)
-	parser.add_argument("indexes_file", help="file containing daily indexes", type=str)
+	parser.add_argument("-f", "--file", help="file containing daily indexes", type=str)
 	parser.add_argument("index_number", help="index number to compute moving average and Bollinger bands", type=int)
 	parser.add_argument("-g", "--graph", help="print a graph of bollinger bands", action="store_true")
+	parser.add_argument("-u", "--url", help="load data from API", type=str)
+	parser.add_argument("-d", "--data", help="object to load from API route", type=str)
 	args = parser.parse_args()
 
-	if not os.path.isfile(args.indexes_file):
+	if args.graph:
+		if args.url is not None and args.data is not None:
+			print(args.url)
+			req = Request(args.url, headers={'User-Agent': 'Mozilla/5.0'})
+			try:
+				data = json.loads(urlopen(req).read())[args.data]
+			except:
+				print("Data field is unavailable")
+				exit(84)
+			t = []
+			for k in data:
+				t.append(data[k])
+			print_graph(t, args.standard_dev)
+			exit(1)
+			
+		print_graph(readfile(args.file, args.index_number, args.period), args.standard_dev)
+	elif args.file and not os.path.isfile(args.file):
 		print("Can't find file '{}'".format(args.indexes_file), file=sys.stderr)
 		sys.exit(84)
-	elif args.graph:
-		print_graph(readfile(args.indexes_file, args.index_number, args.period))
 	else:
 		print_args(args.index_number, args.period, args.standard_dev)
-		print_output(readfile(args.indexes_file, args.index_number, args.period), args.index_number, args.period, args.standard_dev)
+		print_output(readfile(args.file, args.index_number, args.period), args.index_number, args.period, args.standard_dev)
 	
 
 if __name__ == '__main__':

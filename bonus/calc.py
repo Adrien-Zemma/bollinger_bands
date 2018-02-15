@@ -24,3 +24,6 @@ def standard(lines):
 def variance(lines):
     moyen = moy(lines)
     return moy([(x-moyen)**2 for x in lines])
+
+def deviation(lines, standard_dev):
+	return moy(lines) + (standard_dev * standard(lines)), moy(lines) - (standard_dev * standard(lines))
