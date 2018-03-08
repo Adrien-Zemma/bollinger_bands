@@ -1,11 +1,21 @@
+import os.path
+
 def readfile(name, index, period):
-	file = open(name, 'r')
 	lines = []
-	if file is None:
+	len_file = 0
+	if not os.path.isfile(name):
+		print('"{}"don''t exist'.format(name))
 		return None
-	for line in file:
-		if line is not "":
-			lines.append(float(line.replace('\n', '')))
+	with open(name, 'r') as file:
+		for line in file:
+			if line is not "":
+				lines.append(float(line.replace('\n', '')))
+				len_file += 1
+		if not lines:
+			return None
+	if index > len_file or index < 0:
+		print("Error index")
+		return None
 	lines = lines[:int(index) + 2]
 	return lines[(-int(period) - 1):-1]
 

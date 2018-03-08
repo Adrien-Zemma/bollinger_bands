@@ -60,22 +60,23 @@ def main():
 		if args.url is not None and args.data is not None:
 			print(args.url)
 			req = Request(args.url, headers={'User-Agent': 'Mozilla/5.0'})
+			print(urlopen(req).read())
 			try:
 				data = json.loads(urlopen(req).read())[args.data]
 			except:
 				print("Data field is unavailable")
 				exit(84)
-			t = []
-			for k in data:
-				t.append(data[k])
+			t = [data[x] for x in data]
 			print_graph(t, args.standard_dev)
-			exit(1)
-			
-		print_graph(readfile(args.file, args.index_number, args.period), args.standard_dev)
+			exit(0)
+		if args.file is not None:
+			print_graph(readfile(args.file, args.index_number, args.period), args.standard_dev)
 	elif args.file and not os.path.isfile(args.file):
 		print("Can't find file '{}'".format(args.indexes_file), file=sys.stderr)
 		sys.exit(84)
 	else:
+		if readfile(args.file, args.index_number, args.period) is None:
+			sys.exit(84)
 		print_args(args.index_number, args.period, args.standard_dev)
 		print_output(readfile(args.file, args.index_number, args.period), args.index_number, args.period, args.standard_dev)
 	
