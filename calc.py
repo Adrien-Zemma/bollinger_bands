@@ -17,7 +17,6 @@ def readfile(name, index, period):
 		print("Error index")
 		return None
 	lines = lines[:int(index) + 2]
-	print(lines[(-int(period) - 1):-1])
 	return lines[(-int(period) - 1):-1]
 
 def moy(lines):
@@ -34,8 +33,4 @@ def standard(lines):
 
 def variance(lines):
     moyen = moy(lines)
-	new = []
-	for line in lines:
-		new.append((line-moyen)**2)
-	return (moy(new)**0.5)
     return moy([(x-moyen)**2 for x in lines])
