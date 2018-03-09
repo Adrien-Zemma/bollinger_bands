@@ -17,6 +17,9 @@ def readfile(name, index, period):
 		print("Error index")
 		return None
 	lines = lines[:int(index) + 2]
+	if period < 0 or period > len(lines):
+		print("Error period")
+		return None
 	return lines[(-int(period) - 1):-1]
 
 def moy(lines):

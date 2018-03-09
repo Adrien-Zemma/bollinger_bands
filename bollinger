@@ -58,11 +58,11 @@ def main():
 	elif not os.path.isfile(file):
 		sys.exit(84)
 	
-	if readfile(file, index_number, period) is None:
-		sys.exit(84)
 	period = int(period)
+	if readfile(file, index_number, int(period)) is None:
+		sys.exit(84)
 	print_args(index_number, period, standard_dev)
-	print_output(readfile(file, index_number, period), index_number, period, standard_dev)
+	print_output(readfile(file, index_number, period), index_number, int(period), standard_dev)
 	
 
 if __name__ == '__main__':
