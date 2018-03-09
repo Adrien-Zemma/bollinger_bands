@@ -51,7 +51,7 @@ def main():
 		index_number = int(sys.argv[4])
 	except:
 		display_help()
-		sys.exit(1)
+		sys.exit(84)
 	if period == "-h":
 		display_help()
 		sys.exit(0)
